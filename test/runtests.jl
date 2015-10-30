@@ -27,3 +27,5 @@ s = cumsum(a)
 
 @test norm(Levin(s)(18)-Gompertz) < 5e-12
 @test_approx_eq Weniger(s)(19) Gompertz
+
+@test Δ(s)(1) == a(2)
