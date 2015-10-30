@@ -1,5 +1,9 @@
 module SequenceTransformations
+    using Base
+    import Base: +,-,.+,.-,*,.*,/,./
 
-# package code goes here
+include("Sequence.jl")
+include("Transformations.jl")
+include("generate.jl")
 
 end # module
