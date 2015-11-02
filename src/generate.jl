@@ -125,19 +125,21 @@ function Drummondrecurrence!{T}(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vect
 end
 
 function Levinrecurrence!{T}(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{T})
+    kp1 = k+one(T)
+    kdkp1 = k/kp1
+    kdkp1jm2 = 1/kdkp1
     for j = 1:k-1
-        jm2 = j-2one(T)
-        kp1 = k+one(T)
-        cst = -(kp1-j)*(k/kp1)^jm2/kp1
+        cst = -(kp1-j)*kdkp1jm2/kp1
         N[k-j] = muladd(cst,N[k-j],N[k-j+1])
         D[k-j] = muladd(cst,D[k-j],D[k-j+1])
+        kdkp1jm2 *= kdkp1
     end
     ℓ[k] = N[1]/D[1]
 end
 
 function Wenigerrecurrence!{T}(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{T})
+    km1 = k-one(T)
     for j = 1:k-1
-        km1 = k-one(T)
         kjm1 = km1+j
         kjm2 = kjm1-1
         cst = -k*(km1/kjm1)/kjm2
