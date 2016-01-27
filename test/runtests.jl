@@ -29,3 +29,8 @@ s = cumsum(a)
 @test_approx_eq Weniger(s)(19) Gompertz
 
 @test Δ(s)(1) == a(2)
+
+E(z) = lgamma(z) - z*log(z)+z-log(2(π/z))/2
+@vectorize_1arg Number E
+z = linspace(10,100,10)
+@test norm(stirlingseries(z,Val{15}())-E(z),Inf) < sqrt(eps())
