@@ -1,9 +1,6 @@
 __precompile__()
 module SequenceTransformations
-    using Base
-    import Base: +,-,.+,.-,*,.*,/,./,muladd
-
-    Base.muladd(x,y,z) = x*y+z
+    import Base: +, -, *, /
 
     include("Sequence.jl")
     include("Transformations.jl")

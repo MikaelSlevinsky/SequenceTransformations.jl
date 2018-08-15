@@ -4,42 +4,42 @@ function generate!(S::Sequence,n::Int)
     s,a = sequence(S),generator(S)
     i = length(s)
     i ≤ n && resize!(s,n)
-    for k = 1+i:n s[k] = a(k) end
+    for k = 1+i:n s[k] = a[k] end
 end
 
 function generate!(S::Cumsum,n::Int)
     s,a = sequence(S),generator(S)
     i = length(s)
     i ≤ n && resize!(s,n)
-    for k = 1+i:n s[k] = a(k)+s[k-1] end
+    for k = 1+i:n s[k] = a[k]+s[k-1] end
 end
 
 function generate!(S::Cumprod,n::Int)
     s,a = sequence(S),generator(S)
     i = length(s)
     i ≤ n && resize!(s,n)
-    for k = 1+i:n s[k] = a(k)*s[k-1] end
+    for k = 1+i:n s[k] = a[k]*s[k-1] end
 end
 
-function generate!{T,D}(S::Difference{T,D,1},n::Int)
+function generate!(S::Difference{T,D,1},n::Int) where {T,D}
     s,a = sequence(S),generator(S)
     i = length(s)
     i ≤ n && resize!(s,n)
-    for k = 1+i:n s[k] = a(k+1)-a(k) end
+    for k = 1+i:n s[k] = a[k+1]-a[k] end
 end
 
-function generate!{T,D}(S::Difference{T,D,2},n::Int)
+function generate!(S::Difference{T,D,2},n::Int) where {T,D}
     s,a = sequence(S),generator(S)
     i = length(s)
     i ≤ n && resize!(s,n)
-    for k = 1+i:n s[k] = a(k+2)-2a(k+1)+a(k) end
+    for k = 1+i:n s[k] = a[k+2]-2a[k+1]+a[k] end
 end
 
-function generate!{T,D,O}(S::Shift{T,D,O},n::Int)
+function generate!(S::Shift{T,D,O},n::Int) where {T,D,O}
     s,a = sequence(S),generator(S)
     i = length(s)
     i ≤ n && resize!(s,n)
-    for k = 1+i:n s[k] = a(k+O) end
+    for k = 1+i:n s[k] = a[k+O] end
 end
 
 
@@ -50,7 +50,7 @@ function generate!(S::Aitken,n::Int)
     i = length(s)
     i ≤ n && resize!(s,n)
     for k = 1+i:n
-        s[k] = a(k+2)-(a(k+2)-a(k+1))^2/(a(k+2)-2a(k+1)+a(k))
+        s[k] = a[k+2]-(a[k+2]-a[k+1])^2/(a[k+2]-2a[k+1]+a[k])
     end
 end
 
@@ -58,7 +58,7 @@ end
 # Wynn's ϵ- and ρ-algorithms
 
 for trans in (:ϵ,:ρ)
-    rec = parse(string(trans)*"recurrence!")
+    rec = Meta.parse(string(trans)*"recurrence!")
     @eval begin
         function generate!(S::$trans,n::Int)
             data,s = sequence(S),generator(S)
@@ -66,14 +66,14 @@ for trans in (:ϵ,:ρ)
             i = length(data)
             i ≤ n && resize!(data,n);resize!(aux,n)
             for k = 1+i:n
-                aux[k] = s(k)
+                aux[k] = s[k]
                 $rec(k,aux,data)
             end
         end
     end
 end
 
-function ϵrecurrence!{T}(k::Int,aux::Vector{T},data::Vector{T})
+function ϵrecurrence!(k::Int,aux::Vector{T},data::Vector{T}) where T
     aux2 = zero(T)
     for j = k:-1:2
         aux1 = aux2
@@ -84,7 +84,7 @@ function ϵrecurrence!{T}(k::Int,aux::Vector{T},data::Vector{T})
     data[k] = isodd(k) ? aux[1] : aux[2]
 end
 
-function ρrecurrence!{T}(k::Int,aux::Vector{T},data::Vector{T})
+function ρrecurrence!(k::Int,aux::Vector{T},data::Vector{T}) where T
     aux2 = zero(T)
     for j = k:-1:2
         aux1 = aux2
@@ -100,23 +100,23 @@ end
 
 
 for trans in (:Drummond,:Levin,:Weniger)
-    rec = parse(string(trans)*"recurrence!")
+    rec = Meta.parse(string(trans)*"recurrence!")
     @eval begin
-        function generate!{T}(S::$trans{T},n::Int)
+        function generate!(S::$trans{T},n::Int) where T
             ℓ,s = sequence(S),generator(S)
             N,D = numerator(S),denominator(S)
             i = length(ℓ)
             i ≤ n && resize!(ℓ,n);resize!(N,n);resize!(D,n)
             for k = 1+i:n
                 ω = remainder(S,k)
-                N[k],D[k] = s(k)/ω,one(T)/ω
+                N[k],D[k] = s[k]/ω,one(T)/ω
                 $rec(k,ω,N,D,ℓ)
             end
         end
     end
 end
 
-function Drummondrecurrence!{T}(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{T})
+function Drummondrecurrence!(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{T}) where T
     for j = 1:k-1
         N[k-j] = N[k-j+1]-N[k-j]
         D[k-j] = D[k-j+1]-D[k-j]
@@ -124,7 +124,7 @@ function Drummondrecurrence!{T}(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vect
     ℓ[k] = N[1]/D[1]
 end
 
-function Levinrecurrence!{T}(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{T})
+function Levinrecurrence!(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{T}) where T
     kp1 = k+one(T)
     kdkp1 = k/kp1
     kdkp1jm2 = 1/kdkp1
@@ -137,7 +137,7 @@ function Levinrecurrence!{T}(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{
     ℓ[k] = N[1]/D[1]
 end
 
-function Wenigerrecurrence!{T}(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{T})
+function Wenigerrecurrence!(k::Int,ω::T,N::Vector{T},D::Vector{T},ℓ::Vector{T}) where T
     km1 = k-one(T)
     for j = 1:k-1
         kjm1 = km1+j

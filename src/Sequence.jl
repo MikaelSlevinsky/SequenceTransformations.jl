@@ -1,25 +1,27 @@
 export AbstractSequence, Sequence, sequence, generator
 
-abstract AbstractSequence{T,D}
+abstract type AbstractSequence{T,D} end
 
-type Sequence{T,D} <: AbstractSequence{T,D}
-    sequence::Vector{T}
+struct Generator{D}
     generator::D
 end
 
-Sequence{D<:Base.Callable}(generator::D) = Sequence([generator(1)],generator)
+(G::Generator)(i) = G.generator(i)
+Base.getindex(G::Generator, i) = G(i)
+
+mutable struct Sequence{T,D} <: AbstractSequence{T,D}
+    sequence::Vector{T}
+    generator::Generator{D}
+end
+
+Sequence(generator::D) where D<:Base.Callable = Sequence([generator(1)],Generator(generator))
 
 sequence(S::AbstractSequence) = S.sequence
 generator(S::AbstractSequence) = S.generator
 
-Base.eltype{T}(::AbstractSequence{T}) = T
+Base.eltype(::AbstractSequence{T}) where T = T
 Base.size(::AbstractSequence) = (Inf,)
 Base.length(::AbstractSequence) = Inf
-Base.start{T,D}(S::AbstractSequence{T,D}) = S(1)
-Base.next{T,D}(S::AbstractSequence{T,D},i::Int) = S(i),i+1
-Base.next{T,D}(S::AbstractSequence{T,D},i::AbstractFloat) = next(S,round(Int,i))
-Base.done{T,D}(S::AbstractSequence{T,D},i) = i > length(sequence(S))
 
-Base.call{T,D}(S::AbstractSequence{T,D},i::Int) = (generate!(S,i);sequence(S)[i])
-Base.call{T,D}(S::AbstractSequence{T,D},ir::Range) = (generate!(S,maximum(ir));sequence(S)[ir])
-Base.getindex(S::AbstractSequence,i) = S(i)
+Base.getindex(S::AbstractSequence,i::Integer) = (generate!(S,i); sequence(S)[i])
+Base.getindex(S::AbstractSequence,ir::AbstractRange) = (generate!(S,maximum(ir)); sequence(S)[ir])

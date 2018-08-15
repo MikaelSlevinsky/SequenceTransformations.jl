@@ -28,7 +28,7 @@ stirlingseries(z::Float64,n::Val{13}) = @factorialseries(z+1,1/12,1/12,59/360,29
 stirlingseries(z::Float64,n::Val{14}) = @factorialseries(z+1,1/12,1/12,59/360,29/60,533/280,1577/168,280361/5040,69311/180,36226519/11880,7178335/264,64766889203/240240,32128227179/10920,459253205417/13104,325788932161/720)
 stirlingseries(z::Float64,n::Val{15}) = @factorialseries(z+1,1/12,1/12,59/360,29/60,533/280,1577/168,280361/5040,69311/180,36226519/11880,7178335/264,64766889203/240240,32128227179/10920,459253205417/13104,325788932161/720,2311165698322609/367200)
 
-stirlingseries{N}(z::AbstractVector,n::Val{N}) = [ stirlingseries(z[i],n) for i=1:length(z) ]
+stirlingseries(z::AbstractVector,n::Val{N}) where N = [ stirlingseries(z[i],n) for i=1:length(z) ]
 
 function stirlingnumbers(n::Int)
     s = zeros(BigInt,n)
