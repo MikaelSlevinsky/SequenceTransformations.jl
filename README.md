@@ -16,6 +16,7 @@ s = cumsum(a)
 Certain sequence transformations are powerful enough to sum divergent series. Consider the Euler series:
 
 ```julia
+using SpecialFunctions
 Gompertz = -.596347362323194074341078499369279376074
 a = Sequence(i->(-1)^i*gamma(i))
 s = cumsum(a)

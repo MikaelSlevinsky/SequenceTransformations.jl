@@ -1,4 +1,4 @@
-using SequenceTransformations, Test, SpecialFunctions
+using SequenceTransformations, LinearAlgebra, SpecialFunctions, Test
 
 a = Sequence(i->(-1)^(i-1)/(2i-1))
 
@@ -30,6 +30,6 @@ s = cumsum(a)
 
 @test Δ(s)[1] == a[2]
 
-E = z-> lgamma(z) - z*log(z)+z-log(2(π/z))/2
+E = z-> logabsgamma(z)[1] - z*log(z)+z-log(2(π/z))/2
 z = range(10, stop=100, length=10)
 @test norm(stirlingseries(z,Val{15}())-E.(z),Inf) < sqrt(eps())
